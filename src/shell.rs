@@ -2,9 +2,13 @@ use std::io;
 use std::io::{stdin, BufRead, BufReader};
 use std::process::{ChildStdout, Command, Stdio};
 
+use crate::config::{self, Config};
+
 pub struct Shell {
     pipeline: Vec<Command>,
     repr: String,
+    acl: Config,
+    pub debug: bool,
 }
 
 const MAX_PIPELINE_DEPTH: usize = 10;
@@ -21,7 +25,14 @@ impl Shell {
         Shell {
             pipeline: Vec::with_capacity(MAX_PIPELINE_DEPTH),
             repr: String::with_capacity(MAX_REPRESENTATION_LENGTH),
+            acl: Config::new(),
+            debug: false,
         }
+    }
+
+    pub fn load_conf(&mut self) -> io::Result<()> {
+        self.acl = config::load()?;
+        Ok(())
     }
 
     /// command and arguments parser
@@ -77,9 +88,10 @@ impl Shell {
                         };
                         stdout_pipes.push(out);
                     } else {
-                        match Self::exec(
-                            self.pipeline[i].stdin(Stdio::from(stdout_pipes.pop().unwrap())),
-                        ) {
+                        match self.pipeline[i]
+                            .stdin(Stdio::from(stdout_pipes.pop().unwrap()))
+                            .spawn()
+                        {
                             Ok(r) => r,
                             Err(e) => {
                                 eprintln!("{}", e.to_string());
@@ -93,19 +105,42 @@ impl Shell {
         Ok(())
     }
 
-    /// the facade of parser for shell interpreter
-    pub fn parse_pipeline(&mut self) -> io::Result<()> {
+    /// the facade of parser for shell interpreter in interactive mode
+    pub fn parse_pipeline_from_stdin(&mut self) -> io::Result<()> {
+        if self.debug {
+            println!("config: {:?}", self.acl);
+        }
         let mut b = BufReader::new(stdin().lock());
 
         loop {
+            //EOF
             if b.read_line(&mut self.repr)? == 0 {
                 break;
             }
+            //blank line
             if self.repr.trim() == "" {
                 continue;
             }
+            //ACL (pipeline aliases)
+            if self.acl.is_blank() == false {
+                match self.acl.get_white_command(&self.repr.trim()) {
+                    Ok(c) => self.repr = c,
+                    Err(e) => {
+                        eprintln!("{}", e.to_string());
+                        self.repr.clear();
+                        continue;
+                    }
+                }
+            }
+            self.repr = self.repr.trim().to_string();
+            if self.debug {
+                println!("repr: {:?}", self.repr)
+            }
             for p in self.repr.split('|') {
-                let mut cmds = p.split_whitespace().collect::<Vec<&str>>();
+                let mut cmds = p
+                    .split_whitespace()
+                    .map(|s| s.trim())
+                    .collect::<Vec<&str>>();
                 self.pipeline.push(Self::parse_command(&mut cmds));
             }
 
