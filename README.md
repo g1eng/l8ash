@@ -5,12 +5,12 @@ on its command line interface.
 
 If you need to **leash shells and shell users**, you would like to permit certain operation only on your shells
 with pre-defined operational procedures, which contain a set of commands and corresponding arguments, without
-any unnecessary statements including  shell variables, variable expansions, additional command invocation inline,
+any unnecessary statements including  shell variables, variable expansions, inline command invocation,
 declaration of shell functions nor command expansions.
 
 `leash` provides very limited shell features but strong support to restrict command invocation.
 You can permit users only to do typical administration tasks with pre-defined pipelines and its environments.
-To enable this feature, a runtime configuration file is required and its whitelist table must contain `named pipelines` (pipeline alias) for target operations.
+To enable this feature, a runtime configuration file (~/.leashrc) is required and its whitelist table must contain `named pipelines` (pipeline alias) for target operations.
 Optionally, leash can also check the integrity of command binaries when it is invoked on the shell (as a pre-defined pipeline).
 
 `leash` empowers you to protect systems and assets you should keep it always safe.
