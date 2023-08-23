@@ -102,7 +102,7 @@ ls -l | awk {gsub("-","neko",$0);print;} | tr 0  @ | tee -a something.funny | bz
 * **Environmental variables**: Environmental variable for a pipeline can be specified and applied to all command in the pipeline.
 * **Integrity checker**: leash can check the integrity of command binaries which composes a pipeline.
 
-# Configuration
+# Configuration Tips
 
 ## Make whitelist only to permit specific programs
 
@@ -155,6 +155,22 @@ env = ["KUBECONFIG=/var/conf/dist/your-kube-config"]
 integrity = []
 ```
 
+## Check integrity for each command for a pipeline
+
+```
+[[whitelist]]
+name = "lstr"
+command_line = "/bin/ls -l | /bin/tr - o"
+env = []
+integrity = [
+        "a3604f3968fda1471dfdb51a3a4454d8a1b6c3dead99e84f442b515b9b49da53",
+        "3138ff15c875f111613407f39261babafbfe8cdc77a4c1cebb834334b78b9f0b",
+]
+```
+
+#### ATTENTION
+
+For integrity checking, all command must be spelled with its full path, unless the command is not invokable because of failure on path discovery.
 
 # Design concept
 

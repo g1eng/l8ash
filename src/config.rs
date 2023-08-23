@@ -74,7 +74,7 @@ impl Config {
         // self.whitelist.len() == 0 && self.shell_integrity.is_empty()
     }
 
-    /// get command name if the command name is listed in the whitelist
+    /// Get command name if the command name is listed in the whitelist
     pub fn get_white_command(&self, command: &str) -> io::Result<String> {
         for i in 0..self.whitelist.len() {
             if &self.whitelist[i].name == command {
@@ -87,12 +87,12 @@ impl Config {
         ))
     }
 
-    /// get environmental variables for the specified pipeline alias
+    /// Get environmental variables for the specified pipeline alias
     pub fn get_env_vars(&self, pipeline_name: &str) -> io::Result<Vec<(String, String)>> {
         let mut res = Vec::with_capacity(DEFAULT_ENV_MAX_CAPACITY);
         for i in 0..self.whitelist.len() {
             if &self.whitelist[i].name == pipeline_name {
-                eprintln!("command name: {}", pipeline_name);
+                // eprintln!("command name: {}", pipeline_name);
                 for j in 0..self.whitelist[i].env.len() {
                     let t = self.whitelist[i].env[j].split_once('=').unwrap();
                     res.push((t.0.to_string(), t.1.to_string()));
@@ -106,7 +106,8 @@ impl Config {
         ))
     }
 
-    /// get integrity strings for the specified pipeline alias
+    /// Get integrity strings for the specified pipeline alias.
+    /// The length of the returned vector is ensured to be equal to pipeline depth.
     pub fn get_integrities(&self, pipeline_name: &str) -> io::Result<Vec<&String>> {
         let mut res = Vec::with_capacity(DEFAULT_MAX_INTEGRITY_CAPACITY);
         for i in 0..self.whitelist.len() {
@@ -120,6 +121,8 @@ impl Config {
                     .collect::<Vec<&str>>()
                     .len();
                 if res.len() == con {
+                    return Ok(res);
+                } else if res.len() == 0 {
                     return Ok(res);
                 } else {
                     return Err(io::Error::new(
