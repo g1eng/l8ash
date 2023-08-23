@@ -1,5 +1,6 @@
+use std::fs::File;
 use std::io;
-use std::io::{stdin, BufRead, BufReader};
+use std::io::{stdin, BufRead, BufReader, Read};
 use std::process::{ChildStdout, Command, Stdio};
 
 use crate::config::{self, Config};
@@ -33,6 +34,7 @@ impl Shell {
         }
     }
 
+    /// load runtime configuration for the shell instance
     pub fn load_conf(&mut self) -> io::Result<()> {
         self.acl = config::load()?;
         Ok(())
@@ -62,7 +64,12 @@ impl Shell {
             ))
         }
     }
+
+    /// set environmental variables for all command of the specified pipeline
     fn set_env_for_pipeline(&mut self) {
+        if self.debug {
+            eprintln!("env_kv: {:?}", self.env_kv);
+        }
         for i in 0..self.pipeline.len() {
             if self.env_kv.len() != 0 {
                 for j in 0..self.env_kv.len() {
@@ -73,19 +80,10 @@ impl Shell {
     }
 
     /// expression parser to execute command online
-    fn parse_expression(&mut self) -> io::Result<()> {
+    fn parse_pipeline(&mut self) -> io::Result<()> {
         match self.pipeline.len() {
             0 => {}
             1 => {
-                // for v in &self.env_kv {
-                //     if self.debug {
-                //         eprintln!("{}: {}", v.0, v.1)
-                //     }
-                //     self.pipeline[i].env_clear().env(&v.0, &v.1);
-                // }
-                if self.debug {
-                    eprintln!("env_kv: {:?}", self.env_kv);
-                }
                 self.set_env_for_pipeline();
                 if let Err(e) = self.pipeline[0].spawn() {
                     eprintln!("{}", e.to_string());
@@ -95,9 +93,6 @@ impl Shell {
                 self.set_env_for_pipeline();
                 let mut stdout_pipes: Vec<ChildStdout> = Vec::with_capacity(1);
                 let current_command = self.pipeline[0].stdout(Stdio::piped());
-                if self.debug {
-                    eprintln!("env_kv: {:?}", self.env_kv);
-                }
                 if self.env_kv.len() != 0 {
                     for i in 0..self.env_kv.len() {
                         current_command.env(&self.env_kv[i].0, &self.env_kv[i].1);
@@ -142,13 +137,8 @@ impl Shell {
         Ok(())
     }
 
-    /// the facade of parser for shell interpreter in interactive mode
-    pub fn parse_pipeline_from_stdin(&mut self) -> io::Result<()> {
-        if self.debug {
-            println!("config: {:?}", self.acl);
-        }
-        let mut b = BufReader::new(stdin().lock());
-
+    /// core method to implement shared behavior for the commandline parser
+    fn parse_commandline_core<R: Read>(&mut self, mut b: BufReader<R>) -> io::Result<()> {
         loop {
             //EOF
             if b.read_line(&mut self.repr)? == 0 {
@@ -157,6 +147,10 @@ impl Shell {
             //blank line
             self.repr = self.repr.trim().to_string();
             if self.repr == "" {
+                continue;
+            }
+            //comment line
+            if self.repr.starts_with("#") {
                 continue;
             }
             //ACL (pipeline aliases)
@@ -185,7 +179,7 @@ impl Shell {
                 self.pipeline.push(Self::parse_command(&mut cmds));
             }
 
-            self.parse_expression()?;
+            self.parse_pipeline()?;
 
             self.pipeline.clear();
             self.env_kv.clear();
@@ -193,4 +187,25 @@ impl Shell {
         }
         Ok(())
     }
+
+    /// the parser facade for shell interpreter in batch mode
+    pub fn parse_commandline_batch(&mut self, script_file: File) -> io::Result<()> {
+        if self.debug {
+            println!("config: {:?}", self.acl);
+        }
+        let b = BufReader::new(script_file);
+        self.parse_commandline_core(b)?;
+        Ok(())
+    }
+
+    /// the parser facade for shell interpreter in interactive mode
+    pub fn parse_commandline_from_stdin(&mut self) -> io::Result<()> {
+        if self.debug {
+            println!("config: {:?}", self.acl);
+        }
+        let b = BufReader::new(stdin().lock());
+        self.parse_commandline_core(b)?;
+        Ok(())
+    }
 }
+

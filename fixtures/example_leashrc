@@ -1,0 +1,19 @@
+shell_integrity = "ok"
+
+[[whitelist]]
+name = "envg"
+command_line = "env | grep KORE"
+integrity = [
+	"c455fed7392698e5190b0fd3079a0c3c8a9829eb6879d440f6e4aa6b14771168",
+	"a53bd8c96dd27d69b2a489fb345596921745e60c1965bd3ea00e3e4f27c39a58",
+]
+env = [
+	"KORE=ok",
+	"ARE=nok",
+]
+
+[[whitelist]]
+name = "ls"
+command_line = "ls -l"
+integrity = []
+env = []
