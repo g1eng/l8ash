@@ -48,14 +48,14 @@ impl AclTarget {
 pub struct Config {
     whitelist: Vec<AclTarget>,
     // blacklist: Vec<AclTarget>,
-    shell_integrity: String,
+    // shell_integrity: String,
 }
 
 impl Drop for Config {
     fn drop(&mut self) {
         self.whitelist.clear();
         // self.blacklist.clear();
-        self.shell_integrity.clear();
+        // self.shell_integrity.clear();
     }
 }
 
@@ -64,13 +64,14 @@ impl Config {
         Config {
             whitelist: Vec::with_capacity(DEFAULT_WHITELIST_MAX_CAPACITY),
             // blacklist: Vec::with_capacity(DEFAULT_BLACKLIST_MAX_CAPACITY),
-            shell_integrity: String::with_capacity(DEFAULT_MAX_INTEGRITY_CAPACITY),
+            // shell_integrity: String::with_capacity(DEFAULT_MAX_INTEGRITY_CAPACITY),
         }
     }
 
     /// blank config or not
     pub fn is_blank(&self) -> bool {
-        self.whitelist.len() == 0 && self.shell_integrity.is_empty()
+        self.whitelist.len() == 0
+        // self.whitelist.len() == 0 && self.shell_integrity.is_empty()
     }
 
     /// get command name if the command name is listed in the whitelist
@@ -148,7 +149,7 @@ pub fn is_exist() -> bool {
 
 /// generate Config instance from a local runtime configuration file
 pub fn load() -> io::Result<Config> {
-    let rcfile_path = match env::var("LEASHRC_PATH") {
+    let rcfile_path = match env::var("LEASH_CONF") {
         Ok(p) => p,
         Err(_) => format!("{}/.leashrc", env::var("HOME").unwrap()),
     };
@@ -176,27 +177,27 @@ mod test {
     }
     #[test]
     fn test_load_custom_config() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         load().unwrap();
     }
 
     #[test]
     fn test_get_white_command() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         assert_eq!(c.get_white_command("envg").unwrap(), "env | grep KORE");
     }
 
     #[test]
     fn test_get_white_command_error() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         assert!(c.get_white_command("mosomoso_nothing_there").is_err());
     }
 
     #[test]
     fn test_get_env_vars() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         let envvars = c.get_env_vars("envg").unwrap();
         assert_eq!(envvars.len(), 2);
@@ -204,7 +205,7 @@ mod test {
 
     #[test]
     fn test_get_no_env_vars() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         let envvars = c.get_env_vars("ls").unwrap();
         assert_eq!(envvars.len(), 0);
@@ -212,14 +213,14 @@ mod test {
 
     #[test]
     fn test_get_env_vars_for_invalid_command() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         assert!(c.get_env_vars("lsblk").is_err());
     }
 
     #[test]
     fn test_get_integrities() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         let envvars = c.get_integrities("envg").unwrap();
         assert_eq!(envvars.len(), 2);
@@ -227,7 +228,7 @@ mod test {
 
     #[test]
     fn test_get_integrities_for_invalid_command() {
-        env::set_var("LEASHRC_PATH", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let c = load().unwrap();
         assert!(c.get_integrities("lsblk").is_err());
     }
