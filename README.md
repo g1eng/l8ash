@@ -92,7 +92,7 @@ ls -l | awk {gsub("-","neko",$0);print;} | tr 0  @ | tee -a something.funny | bz
   - No redirection `cmd > file` nor `cmd >> file`
   - No indirection `cmd < file`
   - No command termination with semicolon `cmd1; cmd2; cmd3`
-* **No string literals** (said again). So you should write the string `"a b c "` as `a\ b\ c\ `.
+* **No string literals** (said again). A whitespace is always recognized as a word separater.
 
 
 * **Pipeline**: Ordinal pipeline for system shell. It is only the way to modify temporary input/output in a shell session.
@@ -174,7 +174,7 @@ For integrity checking, all command must be spelled with its full path, unless t
 
 # Design concept
 
-See the second clause of the [Features](#Features) above. 
+See the second clause of the [Features](#features) above.
 Each condition, which means the lack of the generic shell feature, is a building block of the <u>**leash security model**</u>.
 
 | Specification                  | Description (especially for the security)                                                            |
