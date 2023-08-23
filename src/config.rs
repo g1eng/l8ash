@@ -20,7 +20,7 @@ const DEFAULT_MAX_INTEGRITY_CAPACITY: usize = 128;
 struct AclTarget {
     name: String,
     command_line: String,
-    env: String,
+    pub env: Vec<String>,
     integrity: String,
 }
 
@@ -38,7 +38,7 @@ impl AclTarget {
         AclTarget {
             name: String::with_capacity(DEFAULT_MAX_COMMAND_NAME_CAPACITY),
             command_line: String::with_capacity(DEFAULT_MAX_COMMAND_LINE_CAPACITY),
-            env: String::with_capacity(DEFAULT_ENV_MAX_CAPACITY),
+            env: Vec::with_capacity(DEFAULT_ENV_MAX_CAPACITY),
             integrity: String::with_capacity(DEFAULT_MAX_INTEGRITY_CAPACITY),
         }
     }
@@ -82,6 +82,26 @@ impl Config {
             io::ErrorKind::PermissionDenied,
             "permission denied",
         ))
+    }
+
+    pub fn get_env_vars(&self, command_name: &str) -> io::Result<Vec<(String, String)>> {
+        let mut res = Vec::with_capacity(DEFAULT_ENV_MAX_CAPACITY);
+        for i in 0..self.whitelist.len() {
+            eprintln!(
+                "evaluating: {} == {}",
+                &self.whitelist[i].name, command_name
+            );
+            if &self.whitelist[i].name == command_name {
+                eprintln!("command name: {}", command_name);
+                for j in 0..self.whitelist[i].env.len() {
+                    let t = self.whitelist[i].env[j].split_once('=').unwrap();
+                    res.push((t.0.to_string(), t.1.to_string()));
+                }
+                return Ok(res);
+            }
+        }
+        eprintln!("no env");
+        Ok(Vec::with_capacity(0))
     }
 }
 

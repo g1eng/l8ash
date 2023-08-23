@@ -6,6 +6,7 @@ use crate::config::{self, Config};
 
 pub struct Shell {
     pipeline: Vec<Command>,
+    env_kv: Vec<(String, String)>,
     repr: String,
     acl: Config,
     pub debug: bool,
@@ -13,6 +14,7 @@ pub struct Shell {
 
 const MAX_PIPELINE_DEPTH: usize = 10;
 const MAX_REPRESENTATION_LENGTH: usize = 256;
+const DEFAULT_ENV_MAX_CAPACITY: usize = 64;
 
 impl Drop for Shell {
     fn drop(&mut self) {
@@ -24,6 +26,7 @@ impl Shell {
     pub fn new() -> Self {
         Shell {
             pipeline: Vec::with_capacity(MAX_PIPELINE_DEPTH),
+            env_kv: Vec::with_capacity(DEFAULT_ENV_MAX_CAPACITY),
             repr: String::with_capacity(MAX_REPRESENTATION_LENGTH),
             acl: Config::new(),
             debug: false,
@@ -59,27 +62,61 @@ impl Shell {
             ))
         }
     }
+    fn set_env_for_pipeline(&mut self) {
+        for i in 0..self.pipeline.len() {
+            if self.env_kv.len() != 0 {
+                for j in 0..self.env_kv.len() {
+                    self.pipeline[i].env(&self.env_kv[j].0, &self.env_kv[j].1);
+                }
+            }
+        }
+    }
 
     /// expression parser to execute command online
     fn parse_expression(&mut self) -> io::Result<()> {
         match self.pipeline.len() {
             0 => {}
             1 => {
+                // for v in &self.env_kv {
+                //     if self.debug {
+                //         eprintln!("{}: {}", v.0, v.1)
+                //     }
+                //     self.pipeline[i].env_clear().env(&v.0, &v.1);
+                // }
+                if self.debug {
+                    eprintln!("env_kv: {:?}", self.env_kv);
+                }
+                self.set_env_for_pipeline();
                 if let Err(e) = self.pipeline[0].spawn() {
                     eprintln!("{}", e.to_string());
                 }
             }
             _ => {
+                self.set_env_for_pipeline();
                 let mut stdout_pipes: Vec<ChildStdout> = Vec::with_capacity(1);
-                let out = Self::exec(self.pipeline[0].stdout(Stdio::piped()))?;
+                let current_command = self.pipeline[0].stdout(Stdio::piped());
+                if self.debug {
+                    eprintln!("env_kv: {:?}", self.env_kv);
+                }
+                if self.env_kv.len() != 0 {
+                    for i in 0..self.env_kv.len() {
+                        current_command.env(&self.env_kv[i].0, &self.env_kv[i].1);
+                    }
+                }
+                let out = Self::exec(current_command)?;
                 stdout_pipes.push(out);
                 for i in 1..self.pipeline.len() {
                     if i < self.pipeline.len() - 1 {
-                        let out = match Self::exec(
-                            self.pipeline[i]
-                                .stdout(Stdio::piped())
-                                .stdin(Stdio::from(stdout_pipes.pop().unwrap())),
-                        ) {
+                        let mut current_command = self.pipeline[i]
+                            .stdout(Stdio::piped())
+                            .stdin(Stdio::from(stdout_pipes.pop().unwrap()));
+                        if self.env_kv.len() != 0 {
+                            for i in 0..self.env_kv.len() {
+                                current_command =
+                                    current_command.env(&self.env_kv[i].0, &self.env_kv[i].1);
+                            }
+                        }
+                        let out = match Self::exec(current_command) {
                             Ok(r) => r,
                             Err(e) => {
                                 eprintln!("{}", e.to_string());
@@ -118,13 +155,17 @@ impl Shell {
                 break;
             }
             //blank line
-            if self.repr.trim() == "" {
+            self.repr = self.repr.trim().to_string();
+            if self.repr == "" {
                 continue;
             }
             //ACL (pipeline aliases)
             if self.acl.is_blank() == false {
                 match self.acl.get_white_command(&self.repr.trim()) {
-                    Ok(c) => self.repr = c,
+                    Ok(c) => {
+                        self.env_kv = self.acl.get_env_vars(self.repr.trim()).unwrap();
+                        self.repr = c;
+                    }
                     Err(e) => {
                         eprintln!("{}", e.to_string());
                         self.repr.clear();
@@ -132,9 +173,9 @@ impl Shell {
                     }
                 }
             }
-            self.repr = self.repr.trim().to_string();
             if self.debug {
-                println!("repr: {:?}", self.repr)
+                println!("repr: {:?}", self.repr);
+                println!("acl: {:?}", self.acl);
             }
             for p in self.repr.split('|') {
                 let mut cmds = p
@@ -147,6 +188,7 @@ impl Shell {
             self.parse_expression()?;
 
             self.pipeline.clear();
+            self.env_kv.clear();
             self.repr.clear();
         }
         Ok(())
