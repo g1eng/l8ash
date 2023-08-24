@@ -20,7 +20,7 @@ Optionally, leash can also check the integrity of command binaries when it is in
 # Installation
 
 ```shell
-cargo install leash
+cargo install l8ash #not `leash`!
 ```
 
 or bulid from your local source code
