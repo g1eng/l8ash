@@ -106,10 +106,10 @@ ls -l | awk {gsub("-","neko",$0);print;} | tr 0  @ | tee -a something.funny | bz
 
 ## Make whitelist only to permit specific programs
 
-To run leash in restricted mode, create `~/.leashrc` and declare `[[white_list]]` in that:
+To run leash in restricted mode, create `~/.leashrc` and declare `[[whitelist]]` in that:
 
-```
-[[white_list]]
+```toml
+[[whitelist]]
 name = "ls"
 command_line = "/bin/ls"
 env = []
@@ -128,8 +128,8 @@ The path of .leashrc can be switched with `LEASH_CONF` environmental variable. I
 You can declare command alias in a whitelist table.
 For the previous example, set an alias in the `name` field for the operation:
 
-```
-[[white_list]]
+```toml
+[[whitelist]]
 name = "l"
 command_line = "/bin/ls"
 env = []
@@ -141,8 +141,8 @@ You cannot invoke `/bin/ls` with its full path or its real name. (and you cannot
 
 Also, you can declare pipeline alias with the same mechanism. Set pipeline statement in the command attribute like following:
 
-```
-[[white_list]]
+```toml
+[[whitelist]]
 name = "count_files"
 command_line = "/bin/ls | wc -l"
 env = []
@@ -151,8 +151,8 @@ integrity = []
 
 ## Pass environmental variables for a pipeline
 
-```
-[[white_list]]
+```toml
+[[whitelist]]
 name = "kci"
 command_line = "/home/mofuzawa/bin/kubectl cluster-info"
 env = ["KUBECONFIG=/var/conf/dist/your-kube-config"]
