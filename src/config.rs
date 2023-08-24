@@ -141,7 +141,7 @@ impl Config {
 /// check whether the runtime configuration is exist or not
 pub fn is_exist() -> bool {
     match File::open(PathBuf::from(format!(
-        "{}/.leashrc",
+        "{}/.l8ashrc",
         env::var("HOME").unwrap()
     ))) {
         Ok(_) => true,
@@ -153,7 +153,7 @@ pub fn is_exist() -> bool {
 pub fn load() -> io::Result<Config> {
     let rcfile_path = match env::var("LEASH_CONF") {
         Ok(p) => p,
-        Err(_) => format!("{}/.leashrc", env::var("HOME").unwrap()),
+        Err(_) => format!("{}/.l8ashrc", env::var("HOME").unwrap()),
     };
     let f = File::open(PathBuf::from(rcfile_path))?;
 
@@ -179,27 +179,27 @@ mod test {
     }
     #[test]
     fn test_load_custom_config() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         load().unwrap();
     }
 
     #[test]
     fn test_get_white_command() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         assert_eq!(c.get_white_command("envg").unwrap(), "env | grep KORE");
     }
 
     #[test]
     fn test_get_white_command_error() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         assert!(c.get_white_command("mosomoso_nothing_there").is_err());
     }
 
     #[test]
     fn test_get_env_vars() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         let envvars = c.get_env_vars("envg").unwrap();
         assert_eq!(envvars.len(), 2);
@@ -207,7 +207,7 @@ mod test {
 
     #[test]
     fn test_get_no_env_vars() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         let envvars = c.get_env_vars("ls").unwrap();
         assert_eq!(envvars.len(), 0);
@@ -215,14 +215,14 @@ mod test {
 
     #[test]
     fn test_get_env_vars_for_invalid_command() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         assert!(c.get_env_vars("lsblk").is_err());
     }
 
     #[test]
     fn test_get_integrities() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         let envvars = c.get_integrities("envg").unwrap();
         assert_eq!(envvars.len(), 2);
@@ -230,7 +230,7 @@ mod test {
 
     #[test]
     fn test_get_integrities_for_invalid_command() {
-        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        env::set_var("LEASH_CONF", "./fixtures/example_l8ashrc");
         let c = load().unwrap();
         assert!(c.get_integrities("lsblk").is_err());
     }
