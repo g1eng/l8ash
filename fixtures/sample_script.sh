@@ -1,2 +1,3 @@
 #!/bin/leash
 envg
+ls

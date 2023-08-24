@@ -119,6 +119,10 @@ integrity = []
 With this configuration, user on the leash session cannot execute program, other than `/bin/ls`.
 For an operation with a single program like this case, `command_line` fields should be a full path of the program and its arguments.
 
+#### ATTENTION
+
+The path of .leashrc can be switched with `LEASH_CONF` environmental variable. If `leash` binary is invoked with preset `LEASH_CONF`, it refers customized path for the runtime configuration.
+
 ## Set pipeline aliases (or named pipeline) on the whitelist
 
 You can declare command alias in a whitelist table.
@@ -193,7 +197,7 @@ Each condition, which means the lack of the generic shell feature, is a building
 
 In addition, leash ensures users only to invoke trusted programs via whitelist.
 
-### ATTENSION
+### ATTENTION
 
 Leash does not cover the protection of filesystem or its contents.
 It is recommended to use another mechanism to protect filesystem from potentially malformed programs or exploits.

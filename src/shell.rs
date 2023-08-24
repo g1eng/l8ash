@@ -224,3 +224,32 @@ impl Shell {
     }
 }
 
+#[cfg(test)]
+mod bdd {
+    use super::*;
+    use std::env;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
+    use std::path::PathBuf;
+
+    #[test]
+    fn parser_core_can_parse_shell_script() {
+        let mut sh = Shell::new();
+        env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
+        let file = File::open(
+            PathBuf::from("./fixtures/sample_script.sh")
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap();
+        sh.parse_commandline_core(BufReader::new(file)).unwrap();
+    }
+
+    #[test]
+    fn p() {
+        let mut sh = Shell::new();
+        sh.env_kv = [("kore", "are"), ("dore", "sore")]
+            .map(|t| (t.0.to_string(), t.1.to_string()))
+            .to_vec();
+    }
+}
