@@ -164,6 +164,8 @@ impl Shell {
             }
             //comment line
             if self.repr.starts_with("#") {
+                self.raw_line.clear();
+                self.repr.clear();
                 continue;
             }
             //ACL (pipeline aliases)

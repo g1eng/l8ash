@@ -200,8 +200,8 @@ In addition, leash ensures users only to invoke trusted programs via whitelist.
 ### ATTENTION
 
 Leash does not cover the protection of filesystem or its contents.
-It is recommended to use another mechanism to protect filesystem from potentially malformed programs or exploits.
-The risk of overwriting leashrc or leash binary itself, is a critical factor for the leash safety.
+It is recommended to use other mechanisms to protect filesystem from potentially malicious programs or exploits.
+The risk of overwriting or replacing leashrc/leash itself, is a critical factor for the leash safety.
 
 # Bug reports
 
