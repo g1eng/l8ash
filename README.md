@@ -1,5 +1,7 @@
 # About
 
+[![codecov](https://codecov.io/gh/g1eng/leash/graph/badge.svg?token=GG320A1HH8)](https://codecov.io/gh/g1eng/leash)
+
 __*leash*__ is a command line shell which is designed to have the least attack surface 
 on its command line interface.
 
