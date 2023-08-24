@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io;
-use std::io::{stdin, BufRead, BufReader, Read};
+use std::io::{BufRead, BufReader};
 use std::process::{ChildStdout, Command, Stdio};
 
 use crate::config::{self, Config};
@@ -18,7 +18,7 @@ pub struct Shell {
 }
 
 const MAX_PIPELINE_DEPTH: usize = 10;
-const MAX_REPRESENTATION_LENGTH: usize = 256;
+const MAX_EXPRESSION_LENGTH: usize = 256;
 const DEFAULT_ENV_MAX_CAPACITY: usize = 64;
 
 const DEFAULT_PSSTRING: &str = "|x|>";
@@ -216,7 +216,7 @@ impl Shell {
             println!("config: {:?}", self.acl);
         }
         let mut b = BufReader::new(script_file);
-        let mut s = String::with_capacity(MAX_REPRESENTATION_LENGTH);
+        let mut s = String::with_capacity(MAX_EXPRESSION_LENGTH);
         loop {
             //EOF
             if b.read_line(&mut s)? == 0 {
@@ -261,8 +261,15 @@ mod bdd {
         )
         .unwrap();
         let mut s = String::new();
-        BufReader::new(file).read_line(&mut s).unwrap();
-        sh.parse_commandline_core(&s).unwrap();
+        let mut buf = BufReader::new(file);
+        loop {
+            if buf.read_line(&mut s).unwrap() == 0 {
+                sh.parse_commandline_core(&s).unwrap();
+                break;
+            }
+            sh.parse_commandline_core(&s).unwrap();
+            s.clear();
+        }
     }
 
     #[test]
@@ -276,7 +283,15 @@ mod bdd {
         )
         .unwrap();
         let mut s = String::new();
-        BufReader::new(file).read_line(&mut s).unwrap();
+        let mut buf = BufReader::new(file);
         sh.parse_commandline_core(&s).unwrap();
+        loop {
+            if buf.read_line(&mut s).unwrap() == 0 {
+                sh.parse_commandline_core(&s).unwrap();
+                break;
+            }
+            sh.parse_commandline_core(&s).unwrap();
+            s.clear();
+        }
     }
 }

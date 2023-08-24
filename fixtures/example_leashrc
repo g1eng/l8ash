@@ -17,3 +17,9 @@ name = "ls"
 command_line = "ls -l"
 integrity = []
 env = []
+
+[[whitelist]]
+name = "g"
+command_line = "grep -E d"
+integrity = []
+env = []
