@@ -235,7 +235,19 @@ mod bdd {
     use std::path::PathBuf;
 
     #[test]
-    fn parser_core_can_parse_shell_script() {
+    fn parser_core_can_parse_leash_compatible_shell_script() {
+        let mut sh = Shell::new();
+        let file = File::open(
+            PathBuf::from("./fixtures/sample_posix_script.sh")
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap();
+        sh.parse_commandline_core(BufReader::new(file)).unwrap();
+    }
+
+    #[test]
+    fn parser_core_can_parse_leash_script_with_restricted_mode() {
         let mut sh = Shell::new();
         env::set_var("LEASH_CONF", "./fixtures/example_leashrc");
         let file = File::open(
@@ -245,13 +257,5 @@ mod bdd {
         )
         .unwrap();
         sh.parse_commandline_core(BufReader::new(file)).unwrap();
-    }
-
-    #[test]
-    fn p() {
-        let mut sh = Shell::new();
-        sh.env_kv = [("kore", "are"), ("dore", "sore")]
-            .map(|t| (t.0.to_string(), t.1.to_string()))
-            .to_vec();
     }
 }
