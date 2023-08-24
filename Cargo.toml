@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "a restrictive shell for system operators"
-homepage = "https://github.com/g1eng/leash"
-repository = "https://github.com/g1eng/leash"
+homepage = "https://github.com/g1eng/l8ash"
+repository = "https://github.com/g1eng/l8ash"
 readme = "README.md"
-documentation = "https://github.com/g1eng/leash"
+documentation = "https://github.com/g1eng/l8ash"
 keywords = ["shell"]
 categories = ["command-line-utilities","shell"]
 

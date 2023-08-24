@@ -1,8 +1,8 @@
 # About
 
-[![codecov](https://codecov.io/gh/g1eng/leash/graph/badge.svg?token=GG320A1HH8)](https://codecov.io/gh/g1eng/leash)
+[![codecov](https://codecov.io/gh/g1eng/l8ash/graph/badge.svg?token=GG320A1HH8)](https://codecov.io/gh/g1eng/l8ash)
 
-__*leash*__ is a command line shell which is designed to have the least attack surface 
+__*l8ash*__ is a command line shell which is designed to have the least attack surface 
 on its command line interface.
 
 If you need to **leash shells and shell users**, you would like to permit certain operation only on your shells
@@ -10,20 +10,22 @@ with pre-defined operational procedures, which contain a set of commands and cor
 any unnecessary statements including  shell variables, variable expansions, inline command invocation,
 declaration of shell functions nor command expansions.
 
-`leash` provides very limited shell features but strong support to restrict command invocation.
+`l8ash` provides very limited shell features but strong support to restrict command invocation.
 You can permit users only to do typical administration tasks with pre-defined pipelines and its environments.
-To enable this feature, a runtime configuration file (~/.leashrc) is required and its whitelist table must contain `named pipelines` (pipeline alias) for target operations.
-Optionally, leash can also check the integrity of command binaries when it is invoked on the shell (as a pre-defined pipeline).
+To enable this feature, a runtime configuration file (~/.l8ashrc) is required and its whitelist table must contain `named pipelines` (pipeline alias) for target operations.
+Optionally, l8ash can also check the integrity of command binaries when it is invoked on the shell (as a pre-defined pipeline).
 
-`leash` empowers you to protect systems and assets you should keep it always safe.
+`l8ash` empowers you to protect systems and assets you should keep it always safe.
 
 # Installation
 
 ```shell
-cargo install l8ash #not `leash`!
+cargo install l8ash
 ```
 
-or bulid from your local source code
+(Be careful, binary name is `l8ash`, not `l8ash`!)
+
+Or you can install binary, building from your local source code:
 
 ```shell
 cd path/to/this/repo
@@ -46,37 +48,37 @@ PREFIX=$HOME/local make install
 ### 1. Simply invoke it as a program
 
 ```shell
-$ leash
+$ l8ash
 ```
 
 ### 2. Feed an acceptable shell script
 
 ```shell
-$ cat some_leash_script.sh
+$ cat some_l8ash_script.sh
 #!/bin/sh
 ls -l | tr -d \\\n 
-$  cat some_leash_script.sh | leash
+$  cat some_l8ash_script.sh | l8ash
 ```
 
 ### 3. Feed shell script as the argument
 
 ```shell
-$  leash some_leash_script.sh 
+$  l8ash some_l8ash_script.sh 
 ```
 
-### 4. Set *leash* as the user's default shell
+### 4. Set *l8ash* as the user's default shell
 
 ```shell
 { 
-  [ -x /bin/leash ] || {
-    echo leash not found >&2
+  [ -x /bin/l8ash ] || {
+    echo l8ash not found >&2
     false
   } &&
-  grep /bin/leash /etc/shells > /dev/null || {
-    echo failed to set leash as your default shell. consider to add `/bin/leash` to your /etc/shells. >&2
+  grep /bin/l8ash /etc/shells > /dev/null || {
+    echo failed to set l8ash as your default shell. consider to add `/bin/l8ash` to your /etc/shells. >&2
     false
   } 
-} && chsh -s /bin/leash 
+} && chsh -s /bin/l8ash 
 ```
 
 ### 5. Play.
@@ -88,7 +90,7 @@ ls -l | awk {gsub("-","neko",$0);print;} | tr 0  @ | tee -a something.funny | bz
 # Features
 
 * Generic commandline interface to invoke commands with raw argument, **without any shell variables and shell functions**.
-* Some of POSIX shell functionalities are **NOT IMPLEMENTED** to achieve the hardened shell experience. The leash has:
+* Some of POSIX shell functionalities are **NOT IMPLEMENTED** to achieve the hardened shell experience. The l8ash has:
   - No builtin commands (no `echo`, `printf`, `cd`, `kill` nor `exit` as a builtin. No other builtins in the world too.)
   - No shell variable `var=val` and `$var`
   - No expansion (no path expansion with * or other special glob characters, neither variable nor command expansion.)
@@ -105,17 +107,17 @@ ls -l | awk {gsub("-","neko",$0);print;} | tr 0  @ | tee -a something.funny | bz
 
 
 * **Pipeline**: Ordinal pipeline for system shell. It is only the way to modify temporary input/output in a shell session.
-* **Runtime configuration**: You can write operation **whitelist** and other configuration in ~/.leashrc.
-* Command **whitelist**: leash prohibits any commands other than listed names (named pipeline) on the whitelist table.
+* **Runtime configuration**: You can write operation **whitelist** and other configuration in ~/.l8ashrc.
+* Command **whitelist**: l8ash prohibits any commands other than listed names (named pipeline) on the whitelist table.
 * **named pipeline / pipeline alias**: permitted operations can be declared as **named pipeline**s in a configuration file.
 * **Environmental variables**: Environmental variable for a pipeline can be specified and applied to all command in the pipeline.
-* **Integrity checker**: leash can check the integrity of command binaries which composes a pipeline.
+* **Integrity checker**: l8ash can check the integrity of command binaries which composes a pipeline.
 
 # Configuration Tips
 
 ## Make whitelist only to permit specific programs
 
-To run leash in restricted mode, create `~/.leashrc` and declare `[[whitelist]]` in that:
+To run l8ash in restricted mode, create `~/.l8ashrc` and declare `[[whitelist]]` in that:
 
 ```toml
 [[whitelist]]
@@ -125,12 +127,12 @@ env = []
 integrity = []
 ```
 
-With this configuration, user on the leash session cannot execute program, other than `/bin/ls`.
+With this configuration, user on the l8ash session cannot execute program, other than `/bin/ls`.
 For an operation with a single program like this case, `command_line` fields should be a full path of the program and its arguments.
 
 #### ATTENTION
 
-The path of .leashrc can be switched with `LEASH_CONF` environmental variable. If `leash` binary is invoked with preset `LEASH_CONF`, it refers customized path for the runtime configuration.
+The path of .l8ashrc can be switched with `LEASH_CONF` environmental variable. If `l8ash` binary is invoked with preset `LEASH_CONF`, it refers customized path for the runtime configuration.
 
 ## Set pipeline aliases (or named pipeline) on the whitelist
 
@@ -188,7 +190,7 @@ For integrity checking, all command must be spelled with its full path, unless t
 # Design concept
 
 See the second clause of the [Features](#features) above.
-Each condition, which means the lack of the generic shell feature, is a building block of the <u>**leash security model**</u>.
+Each condition, which means the lack of the generic shell feature, is a building block of the <u>**l8ash security model**</u>.
 
 | Specification                  | Description (especially for the security)                                                            |
 |--------------------------------|------------------------------------------------------------------------------------------------------|
@@ -202,15 +204,15 @@ Each condition, which means the lack of the generic shell feature, is a building
 | No group command               | No bundle of stdout/stderr. A command has single I/O in a pipeline.                                  |
 | No background tasks            | No unmanaged processes which is hanged up after the spawning.                                        |
 | No redirection nor indirection | No read/write operation for the shell itself. Filesystem I/O is only permitted for commands.         |
-| No semicolon                   | EOL is the only-one op code for the list evaluation. Thus, a list must be a pipeline in the *leash*. |
+| No semicolon                   | EOL is the only-one op code for the list evaluation. Thus, a list must be a pipeline in the *l8ash*. |
 
-In addition, leash ensures users only to invoke trusted programs via whitelist.
+In addition, l8ash ensures users only to invoke trusted programs via whitelist.
 
 ### ATTENTION
 
 Leash does not cover the protection of filesystem or its contents.
 It is recommended to use other mechanisms to protect filesystem from potentially malicious programs or exploits.
-The risk of overwriting or replacing leashrc/leash itself, is a critical factor for the leash safety.
+The risk of overwriting or replacing l8ashrc/l8ash itself, is a critical factor for the l8ash safety.
 
 # Bug reports
 
