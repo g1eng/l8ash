@@ -18,6 +18,13 @@ Optionally, leash can also check the integrity of command binaries when it is in
 # Installation
 
 ```shell
+cargo install leash
+```
+
+or bulid from your local source code
+
+```shell
+cd path/to/this/repo
 make
 sudo make install
 ```

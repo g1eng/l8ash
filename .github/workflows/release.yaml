@@ -1,0 +1,23 @@
+name: Release to crates.io
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        run: rustup update stable
+      - name: build binary
+        run: cargo build --release
+      - name: set credential for crate.io
+        run: echo "${{ secrets.CARGO_REGISTRY_TOKEN}}" | cargo login
+      - name: packaging crate
+        run: cargo publish --dry-run
+      - name: check package component
+        run: cargo package --list
+      - name: publish
+        run: cargo publish

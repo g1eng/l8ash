@@ -9,7 +9,6 @@ use std::path::PathBuf;
 use toml;
 
 const DEFAULT_WHITELIST_MAX_CAPACITY: usize = 128;
-const DEFAULT_BLACKLIST_MAX_CAPACITY: usize = 256;
 
 const DEFAULT_MAX_COMMAND_NAME_CAPACITY: usize = 32;
 const DEFAULT_MAX_COMMAND_LINE_CAPACITY: usize = 128;

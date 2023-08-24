@@ -6,7 +6,10 @@ use std::process::{ChildStdout, Command, Stdio};
 use crate::config::{self, Config};
 use crate::functions::calc_sha256sums;
 use ring::test;
-use ttyui::readline::read_line;
+use ttyui::readline::Buffer;
+
+use std::thread::sleep;
+use std::time::Duration;
 
 pub struct Shell {
     pipeline: Vec<Command>,
@@ -21,7 +24,7 @@ const MAX_PIPELINE_DEPTH: usize = 10;
 const MAX_EXPRESSION_LENGTH: usize = 256;
 const DEFAULT_ENV_MAX_CAPACITY: usize = 64;
 
-const DEFAULT_PSSTRING: &str = "|x|>";
+const DEFAULT_PSSTRING: &str = "|x|> ";
 
 impl Drop for Shell {
     fn drop(&mut self) {
@@ -234,11 +237,16 @@ impl Shell {
         if self.debug {
             println!("config: {:?}", self.acl);
         }
+        println!();
         loop {
-            let mut s = read_line()?;
+            let mut buf = Buffer::new();
+            buf.set_prefix(DEFAULT_PSSTRING.to_string());
+            buf.read_line()?;
+            self.parse_commandline_core(buf.to_string().as_str())?;
             println!();
-            self.parse_commandline_core(&s)?;
-            s.clear();
+            // FIXME: the prefix string rendering is too fast to output and headed to
+            // command output because the command stdout results asynchronous writing.
+            sleep(Duration::from_millis(10));
         }
     }
 }
